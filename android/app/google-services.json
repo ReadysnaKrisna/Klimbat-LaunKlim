@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "677367516525",
+    "project_id": "klimbat-launklim",
+    "storage_bucket": "klimbat-launklim.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677367516525:android:a88a19f7e25274f552de64",
+        "android_client_info": {
+          "package_name": "com.example.klimbat_launklim"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvyylzUaacRs1NatUO3l05DjZ71Xitt4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
