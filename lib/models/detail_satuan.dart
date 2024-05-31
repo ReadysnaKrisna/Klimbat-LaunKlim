@@ -8,7 +8,7 @@ class Detail {
   Detail({required this.name, required this.price, required this.duration});
 }
 
-class DetailKiloan extends StatelessWidget {
+class DetailSatuan extends StatelessWidget {
   final List<Detail> services = [
     Detail(name: '1 kg (Pakaian Dalam)', price: 5000, duration: '12 Jam'),
     Detail(name: '1 kg (Pakaian Dalam)', price: 10000, duration: '6 Jam'),
