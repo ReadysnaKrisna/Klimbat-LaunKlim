@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:klimbat_launklim/models/detail_ekspres.dart';
 import 'package:klimbat_launklim/models/detail_kiloan.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -227,6 +228,13 @@ class _SearchableServiceSectionState extends State<SearchableServiceSection> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailKiloan(),
+                  ),
+                );
+              } else if (service.label == 'Ekspress') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailEkspress(),
                   ),
                 );
               }
