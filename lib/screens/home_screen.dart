@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:klimbat_launklim/models/detail_ekspres.dart';
 import 'package:klimbat_launklim/models/detail_kiloan.dart';
+import 'package:klimbat_launklim/models/detail_satuan.dart';
+import 'package:klimbat_launklim/screens/profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -16,12 +18,18 @@ class HomeScreen extends StatelessWidget {
     return userDoc['nama'];
   }
 
+  void _onItemTapped(BuildContext context, int index) {
+    if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('LaunKlim'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -64,6 +72,7 @@ class HomeScreen extends StatelessWidget {
             label: 'Account',
           ),
         ],
+        onTap: (index) => _onItemTapped(context, index),
       ),
     );
   }
@@ -235,6 +244,14 @@ class _SearchableServiceSectionState extends State<SearchableServiceSection> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailEkspress(),
+                  ),
+                );
+              }
+              if (service.label == 'Satuan') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailSatuan(),
                   ),
                 );
               }
