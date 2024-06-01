@@ -5,10 +5,6 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      appBar: AppBar(
-        title: Text('Account'),
-        backgroundColor: Colors.lightBlueAccent,
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -64,23 +60,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Account',
-          ),
-        ],
-        unselectedItemColor: Colors.black,
       ),
     );
   }

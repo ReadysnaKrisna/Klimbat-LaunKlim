@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+class Detail {
+  final String name;
+  final int price;
+  final String duration;
+
+  Detail({required this.name, required this.price, required this.duration});
+}
+
 class DetailPesan extends StatefulWidget {
   @override
   _DetailPesanState createState() => _DetailPesanState();
@@ -7,18 +15,28 @@ class DetailPesan extends StatefulWidget {
 
 class _DetailPesanState extends State<DetailPesan> {
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _messageController = TextEditingController();
 
-  List<bool> _selectedServices = [false, false];
-  int _totalPayment = 1500;
+  List<bool> _selectedServices = [false, false, false, false, false];
+  int _totalPayment = 0;
+
+  final List<Detail> services = [
+    Detail(name: 'Reguler', price: 7000, duration: '3 Hari'),
+    Detail(name: 'Cuci Cepat', price: 12000, duration: '1 Hari'),
+    Detail(name: 'Setrika Reguler', price: 4500, duration: '3 Hari'),
+    Detail(name: 'Setrika Cepat', price: 7000, duration: '1 Hari'),
+    Detail(name: 'Cuci Kering', price: 4000, duration: '3 Jam'),
+  ];
 
   void _updateTotalPayment() {
-    int basePayment = 1500; // Biaya Pengiriman
-    if (_selectedServices[0]) basePayment += 5000; // Kiloan
-    if (_selectedServices[1]) basePayment += 10000; // Karpet
+    int ongkir = 0;
+    for (int i = 0; i < _selectedServices.length; i++) {
+      if (_selectedServices[i]) {
+        ongkir += services[i].price;
+      }
+    }
 
     setState(() {
-      _totalPayment = basePayment;
+      _totalPayment = ongkir;
     });
   }
 
@@ -26,8 +44,7 @@ class _DetailPesanState extends State<DetailPesan> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:
-            Color(0xFF81C8FF), // Match the color from the screenshot
+        backgroundColor: Colors.lightBlueAccent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -39,7 +56,7 @@ class _DetailPesanState extends State<DetailPesan> {
         child: Column(
           children: [
             Container(
-              color: Color(0xFF81C8FF), // Background color for address section
+              color: Colors.lightBlueAccent,
               padding: EdgeInsets.all(16),
               child: TextField(
                 controller: _addressController,
@@ -53,8 +70,7 @@ class _DetailPesanState extends State<DetailPesan> {
             ),
             SizedBox(height: 16),
             Container(
-              color: Colors.grey[200] ??
-                  Color(0xFFEEEEEE), // Background color for service section
+              color: Colors.grey[200] ?? Color(0xFFEEEEEE),
               padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,89 +83,41 @@ class _DetailPesanState extends State<DetailPesan> {
                         color: Colors.black),
                   ),
                   SizedBox(height: 8),
-                  ToggleButtons(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Kiloan', style: TextStyle(fontSize: 16)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Setrika saja',
-                            style: TextStyle(fontSize: 16)),
-                      ),
-                    ],
-                    isSelected: _selectedServices,
-                    onPressed: (int index) {
-                      setState(() {
-                        _selectedServices[index] = !_selectedServices[index];
-                        _updateTotalPayment();
-                      });
-                    },
-                    fillColor: Color(0xFF81C8FF),
-                    selectedColor: Colors.white,
-                    borderRadius: BorderRadius.circular(8.0),
+                  Column(
+                    children: List.generate(services.length, (index) {
+                      return CheckboxListTile(
+                        title: Text(
+                          services[index].name,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        subtitle: Text(
+                          'Rp ${services[index].price} - ${services[index].duration}',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        value: _selectedServices[index],
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _selectedServices[index] = value ?? false;
+                            _updateTotalPayment();
+                          });
+                        },
+                      );
+                    }),
                   ),
-                  if (_selectedServices[0]) ...[
-                    SizedBox(height: 8),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      color: Colors.grey[100],
-                      child: Column(
-                        children: [
-                          Text('Detail layanan Kiloan:',
-                              style: TextStyle(fontSize: 14)),
-                          Text('Rp 5000 - 1 Hari',
-                              style: TextStyle(fontSize: 14)),
-                        ],
-                      ),
-                    ),
-                  ],
-                  if (_selectedServices[1]) ...[
-                    SizedBox(height: 8),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      color: Colors.grey[100],
-                      child: Column(
-                        children: [
-                          Text('Detail layanan Setrika:',
-                              style: TextStyle(fontSize: 14)),
-                          Text('Rp 2000 - 1 Hari',
-                              style: TextStyle(fontSize: 14)),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
             Divider(thickness: 1, color: Colors.black),
             SizedBox(height: 8),
-            SummaryTile(
-              label: 'Biaya Pengiriman:',
-              amount: 1500,
+            Bayar(
+              nama: 'Biaya Pengiriman:',
+              harga: 5000,
               color: Colors.grey[200] ?? Color(0xFFEEEEEE),
             ),
-            SizedBox(height: 8),
-            Container(
-              color: Colors.grey[200] ??
-                  Color(0xFFEEEEEE), // Background color for message section
-              padding: EdgeInsets.all(16),
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Silahkan tinggalkan pesan',
-                  hintStyle: TextStyle(color: Colors.black),
-                  border: InputBorder.none,
-                ),
-                maxLines: 3,
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
             Spacer(),
-            SummaryTile(
-              label: 'Total Pembayaran:',
-              amount: _totalPayment,
+            Bayar(
+              nama: 'Total Pembayaran:',
+              harga: _totalPayment,
               color: Colors.grey[200] ?? Color(0xFFEEEEEE),
             ),
             SizedBox(height: 16),
@@ -160,7 +128,8 @@ class _DetailPesanState extends State<DetailPesan> {
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                  backgroundColor: Color(0xFF81C8FF), // Match the button color
+                  backgroundColor:
+                      Colors.lightBlueAccent, // Match the button color
                   textStyle: TextStyle(fontSize: 18, color: Colors.black),
                 ),
                 child: Text('PESAN', style: TextStyle(color: Colors.black)),
@@ -173,14 +142,14 @@ class _DetailPesanState extends State<DetailPesan> {
   }
 }
 
-class SummaryTile extends StatelessWidget {
-  final String label;
-  final int amount;
+class Bayar extends StatelessWidget {
+  final String nama;
+  final int harga;
   final Color color;
 
-  const SummaryTile({
-    required this.label,
-    required this.amount,
+  const Bayar({
+    required this.nama,
+    required this.harga,
     required this.color,
   });
 
@@ -193,8 +162,8 @@ class SummaryTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 16)),
-          Text('Rp $amount', style: TextStyle(fontSize: 16)),
+          Text(nama, style: TextStyle(fontSize: 16)),
+          Text('Rp $harga', style: TextStyle(fontSize: 16)),
         ],
       ),
     );

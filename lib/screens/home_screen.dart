@@ -8,8 +8,15 @@ import 'package:klimbat_launklim/models/detail_vip.dart';
 import 'package:klimbat_launklim/screens/history_screen.dart';
 import 'package:klimbat_launklim/screens/profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final User? user = FirebaseAuth.instance.currentUser;
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
 
   Future<String> _getUserName() async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -19,65 +26,28 @@ class HomeScreen extends StatelessWidget {
     return userDoc['nama'];
   }
 
-  void _onItemTapped(BuildContext context, int index) {
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HistoryScreen()),
-      );
-    }
-    if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ProfileScreen()),
-      );
-    }
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.jumpToPage(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            FutureBuilder<String>(
-              future: _getUserName(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return WelcomeSection(userName: snapshot.data ?? 'User');
-                }
-              },
-            ),
-            SizedBox(
-                height:
-                    40), // Menambahkan jarak antara WelcomeSection dan Search
-            Expanded(
-              child: Column(
-                children: [
-                  SearchableServiceSection(),
-                  SizedBox(height: 2),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailPesan(),
-                        ),
-                      );
-                    },
-                    child: Text('Pesan'),
-                  ),
-                  PesananAktif(),
-                ],
-              ),
-            )
-          ],
-        ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: [
+          HomeContent(getUserName: _getUserName),
+          HistoryScreen(),
+          ProfileScreen(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -94,96 +64,100 @@ class HomeScreen extends StatelessWidget {
             label: 'Account',
           ),
         ],
-        onTap: (index) => _onItemTapped(context, index),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
 }
 
-class WelcomeSection extends StatefulWidget {
+class HomeContent extends StatelessWidget {
+  final Future<String> Function() getUserName;
+
+  HomeContent({required this.getUserName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          FutureBuilder<String>(
+            future: getUserName(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return WelcomeSection(userName: snapshot.data ?? 'User');
+              }
+            },
+          ),
+          SizedBox(height: 30),
+          Expanded(
+            child: Column(
+              children: [
+                ServiceSection(),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailPesan(),
+                      ),
+                    );
+                  },
+                  child: Text('Pesan'),
+                ),
+                // PesananAktif(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WelcomeSection extends StatelessWidget {
   final String userName;
 
   WelcomeSection({required this.userName});
 
   @override
-  _WelcomeSectionState createState() => _WelcomeSectionState();
-}
-
-class _WelcomeSectionState extends State<WelcomeSection> {
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('Selamat Datang, ${widget.userName}',
-            style: TextStyle(fontSize: 20)),
-        SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                    hintText: 'Search Layanan',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                    fillColor: Colors.lightBlueAccent),
-                onChanged: (value) {
-                  context
-                      .findAncestorStateOfType<_SearchableServiceSectionState>()
-                      ?.updateSearchQuery(value);
-                },
-              ),
-            ),
-          ],
-        ),
+        Text('Selamat Datang, $userName', style: TextStyle(fontSize: 20)),
       ],
     );
   }
 }
 
-class SearchableServiceSection extends StatefulWidget {
-  @override
-  _SearchableServiceSectionState createState() =>
-      _SearchableServiceSectionState();
-}
-
-class _SearchableServiceSectionState extends State<SearchableServiceSection> {
+class ServiceSection extends StatelessWidget {
   final List<Layanan> _allServices = [
     Layanan(icon: Icons.local_laundry_service, label: 'Kiloan'),
     Layanan(icon: Icons.shopping_bag, label: 'Item Kasur'),
     Layanan(icon: Icons.dry_cleaning, label: 'VIP'),
   ];
 
-  String _searchQuery = '';
-
-  void updateSearchQuery(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    List<Layanan> filteredServices = _allServices
-        .where((service) =>
-            service.label.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
-
     return Expanded(
       child: GridView.builder(
-        padding: EdgeInsets.all(8), // Menambahkan padding pada GridView
+        padding: EdgeInsets.all(4),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          crossAxisSpacing: 8, // Jarak horizontal antar item
-          mainAxisSpacing: 8, // Jarak vertikal antar item
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
-        itemCount: filteredServices.length,
+        itemCount: _allServices.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-              if (filteredServices[index].label == 'Kiloan') {
+              if (_allServices[index].label == 'Kiloan') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -191,7 +165,7 @@ class _SearchableServiceSectionState extends State<SearchableServiceSection> {
                   ),
                 );
               }
-              if (filteredServices[index].label == 'Item Kasur') {
+              if (_allServices[index].label == 'Item Kasur') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -199,7 +173,7 @@ class _SearchableServiceSectionState extends State<SearchableServiceSection> {
                   ),
                 );
               }
-              if (filteredServices[index].label == 'VIP') {
+              if (_allServices[index].label == 'VIP') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -208,7 +182,7 @@ class _SearchableServiceSectionState extends State<SearchableServiceSection> {
                 );
               }
             },
-            child: filteredServices[index],
+            child: _allServices[index],
           );
         },
       ),
@@ -226,7 +200,7 @@ class Layanan extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: Colors.lightBlueAccent,
         border: Border.all(color: Colors.lightBlueAccent),
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -237,19 +211,6 @@ class Layanan extends StatelessWidget {
           Text(label, style: TextStyle(color: Colors.black)),
         ],
       ),
-    );
-  }
-}
-
-class PesananAktif extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Pesanan Aktif',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-      ],
     );
   }
 }
