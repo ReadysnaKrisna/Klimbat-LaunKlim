@@ -1,8 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:klimbat_launklim/firebase_options.dart';
-import 'package:klimbat_launklim/screens/home_screen.dart';
-import 'package:klimbat_launklim/screens/sign_up_screen.dart';
 import 'package:klimbat_launklim/screens/splash_screen.dart';
 
 void main() async {

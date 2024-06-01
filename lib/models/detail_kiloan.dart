@@ -10,13 +10,11 @@ class Detail {
 
 class DetailKiloan extends StatelessWidget {
   final List<Detail> services = [
-    Detail(name: '1 kg (Pakaian Dalam)', price: 5000, duration: '3 Hari'),
-    Detail(name: '1 kg (Pakaian Dalam)', price: 10000, duration: '1 Hari'),
-    Detail(name: '1 kg (Pakaian Dalam)', price: 15000, duration: '12 Jam'),
-    Detail(name: '1 kg (Pakaian Biasa)', price: 6000, duration: '3 Hari'),
-    Detail(name: '1 kg (Pakaian Biasa)', price: 12000, duration: '1 Hari'),
-    Detail(name: '1 kg (Pakaian Biasa)', price: 18000, duration: '12 Jam'),
-    Detail(name: '1 kg (Pakaian Kerja)', price: 8000, duration: '3 Hari'),
+    Detail(name: 'Reguler', price: 7000, duration: '3 Hari'),
+    Detail(name: 'Cuci Cepat', price: 12000, duration: '1 Hari'),
+    Detail(name: 'Setrika Reguler', price: 4500, duration: '3 Hari'),
+    Detail(name: 'Setrika Cepat', price: 7000, duration: '1 Hari'),
+    Detail(name: 'Cuci Kering', price: 4000, duration: '3 Jam'),
   ];
 
   @override
@@ -32,7 +30,7 @@ class DetailKiloan extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(16.0),
               alignment: Alignment.center,
-              color: Colors.lightBlue,
+              color: Colors.lightBlueAccent,
               child: Text(
                 'Kiloan',
                 style: TextStyle(
@@ -47,7 +45,7 @@ class DetailKiloan extends StatelessWidget {
                 itemCount: services.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    color: Colors.lightBlue,
+                    color: Colors.lightBlueAccent,
                     margin: EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
                       leading: Icon(Icons.local_laundry_service,

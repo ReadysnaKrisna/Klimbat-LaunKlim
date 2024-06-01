@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class DetailEkspress extends StatefulWidget {
+class DetailPesan extends StatefulWidget {
   @override
-  _DetailEkspressState createState() => _DetailEkspressState();
+  _DetailPesanState createState() => _DetailPesanState();
 }
 
-class _DetailEkspressState extends State<DetailEkspress> {
+class _DetailPesanState extends State<DetailPesan> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
@@ -32,7 +32,7 @@ class _DetailEkspressState extends State<DetailEkspress> {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Detail Ekspress', style: TextStyle(color: Colors.black)),
+        title: Text('Pemesanan', style: TextStyle(color: Colors.black)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

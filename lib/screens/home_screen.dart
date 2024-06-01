@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:klimbat_launklim/models/detail_ekspres.dart';
+import 'package:klimbat_launklim/models/detail_pesan.dart';
 import 'package:klimbat_launklim/models/detail_kiloan.dart';
-import 'package:klimbat_launklim/models/detail_satuan.dart';
+import 'package:klimbat_launklim/models/detail_item_kasur.dart';
+import 'package:klimbat_launklim/models/detail_vip.dart';
+import 'package:klimbat_launklim/screens/history_screen.dart';
 import 'package:klimbat_launklim/screens/profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -19,6 +20,12 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _onItemTapped(BuildContext context, int index) {
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HistoryScreen()),
+      );
+    }
     if (index == 2) {
       Navigator.push(
         context,
@@ -46,11 +53,26 @@ class HomeScreen extends StatelessWidget {
                 }
               },
             ),
+            SizedBox(
+                height:
+                    40), // Menambahkan jarak antara WelcomeSection dan Search
             Expanded(
               child: Column(
                 children: [
                   SearchableServiceSection(),
-                  ActiveOrdersSection(),
+                  SizedBox(height: 2),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailPesan(),
+                        ),
+                      );
+                    },
+                    child: Text('Pesan'),
+                  ),
+                  PesananAktif(),
                 ],
               ),
             )
@@ -89,65 +111,6 @@ class WelcomeSection extends StatefulWidget {
 
 class _WelcomeSectionState extends State<WelcomeSection> {
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  String _address = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadAddress();
-  }
-
-  Future<void> _loadAddress() async {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
-    setState(() {
-      _address = userDoc['address'] ?? '';
-      _addressController.text = _address;
-    });
-  }
-
-  Future<void> _updateAddress() async {
-    String newAddress = _addressController.text;
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .update({'address': newAddress});
-    setState(() {
-      _address = newAddress;
-    });
-  }
-
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    String newAddress =
-        'Lat: ${position.latitude}, Long: ${position.longitude}';
-    _addressController.text = newAddress;
-    _updateAddress();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,32 +125,16 @@ class _WelcomeSectionState extends State<WelcomeSection> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search Layanan',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
+                    hintText: 'Search Layanan',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                    fillColor: Colors.lightBlueAccent),
                 onChanged: (value) {
                   context
                       .findAncestorStateOfType<_SearchableServiceSectionState>()
                       ?.updateSearchQuery(value);
                 },
               ),
-            ),
-            SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                  hintText: 'Alamat',
-                  prefixIcon: Icon(Icons.location_on),
-                  border: OutlineInputBorder(),
-                ),
-                onSubmitted: (value) => _updateAddress(),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.my_location),
-              onPressed: _getCurrentLocation,
             ),
           ],
         ),
@@ -203,12 +150,10 @@ class SearchableServiceSection extends StatefulWidget {
 }
 
 class _SearchableServiceSectionState extends State<SearchableServiceSection> {
-  final List<ServiceTile> _allServices = [
-    ServiceTile(icon: Icons.local_laundry_service, label: 'Kiloan'),
-    ServiceTile(icon: Icons.shopping_bag, label: 'Satuan'),
-    ServiceTile(icon: Icons.dry_cleaning, label: 'VIP'),
-    ServiceTile(icon: Icons.iron, label: 'Setrika Saja'),
-    ServiceTile(icon: Icons.flash_on, label: 'Ekspress'),
+  final List<Layanan> _allServices = [
+    Layanan(icon: Icons.local_laundry_service, label: 'Kiloan'),
+    Layanan(icon: Icons.shopping_bag, label: 'Item Kasur'),
+    Layanan(icon: Icons.dry_cleaning, label: 'VIP'),
   ];
 
   String _searchQuery = '';
@@ -221,68 +166,82 @@ class _SearchableServiceSectionState extends State<SearchableServiceSection> {
 
   @override
   Widget build(BuildContext context) {
-    List<ServiceTile> filteredServices = _allServices
+    List<Layanan> filteredServices = _allServices
         .where((service) =>
             service.label.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
 
     return Expanded(
-      child: GridView.count(
-        crossAxisCount: 3,
-        children: filteredServices.map((service) {
+      child: GridView.builder(
+        padding: EdgeInsets.all(8), // Menambahkan padding pada GridView
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 8, // Jarak horizontal antar item
+          mainAxisSpacing: 8, // Jarak vertikal antar item
+        ),
+        itemCount: filteredServices.length,
+        itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-              if (service.label == 'Kiloan') {
+              if (filteredServices[index].label == 'Kiloan') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailKiloan(),
                   ),
                 );
-              } else if (service.label == 'Ekspress') {
+              }
+              if (filteredServices[index].label == 'Item Kasur') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailEkspress(),
+                    builder: (context) => DetailItemKasur(),
                   ),
                 );
               }
-              if (service.label == 'Satuan') {
+              if (filteredServices[index].label == 'VIP') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailSatuan(),
+                    builder: (context) => DetailVIP(),
                   ),
                 );
               }
             },
-            child: service,
+            child: filteredServices[index],
           );
-        }).toList(),
+        },
       ),
     );
   }
 }
 
-class ServiceTile extends StatelessWidget {
+class Layanan extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const ServiceTile({required this.icon, required this.label});
+  const Layanan({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 50),
-        Text(label),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        border: Border.all(color: Colors.lightBlueAccent),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 50, color: Colors.black),
+          Text(label, style: TextStyle(color: Colors.black)),
+        ],
+      ),
     );
   }
 }
 
-class ActiveOrdersSection extends StatelessWidget {
+class PesananAktif extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -290,27 +249,7 @@ class ActiveOrdersSection extends StatelessWidget {
       children: [
         const Text('Pesanan Aktif',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        ActiveOrderTile(orderNumber: '0002142', status: 'Sudah selesai'),
-        ActiveOrderTile(orderNumber: '0002143', status: 'Masih dicuci'),
       ],
-    );
-  }
-}
-
-class ActiveOrderTile extends StatelessWidget {
-  final String orderNumber;
-  final String status;
-
-  const ActiveOrderTile({required this.orderNumber, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Icon(Icons.local_laundry_service),
-        title: Text('Pesanan No.$orderNumber'),
-        subtitle: Text(status),
-      ),
     );
   }
 }

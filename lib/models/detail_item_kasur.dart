@@ -8,15 +8,17 @@ class Detail {
   Detail({required this.name, required this.price, required this.duration});
 }
 
-class DetailSatuan extends StatelessWidget {
+class DetailItemKasur extends StatelessWidget {
   final List<Detail> services = [
-    Detail(name: '1 kg (Pakaian Dalam)', price: 5000, duration: '12 Jam'),
-    Detail(name: '1 kg (Pakaian Dalam)', price: 10000, duration: '6 Jam'),
-    Detail(name: '1 kg (Pakaian Dalam)', price: 15000, duration: '3 Jam'),
-    Detail(name: '1 kg (Pakaian Biasa)', price: 15000, duration: '3 Jam'),
-    Detail(name: '1 kg (Pakaian Biasa)', price: 12000, duration: '1 Jam'),
-    Detail(name: '1 kg (Pakaian Biasa)', price: 18000, duration: '12 Jam'),
-    Detail(name: '1 kg (Pakaian Kerja)', price: 8000, duration: '3 Jam,'),
+    Detail(name: 'Bedcover No.1', price: 25000, duration: '3 Hari'),
+    Detail(name: 'Bedcover No.2', price: 20000, duration: '3 Hari'),
+    Detail(name: 'Bedcover No.3', price: 15000, duration: '3 Hari'),
+    Detail(name: 'Seprei No.1', price: 15000, duration: '3 Hari'),
+    Detail(name: 'Seprei No.2', price: 10000, duration: '3 Hari'),
+    Detail(name: 'Seprei No.3', price: 8000, duration: '3 Hari'),
+    Detail(name: 'Seprei Sedang/Double', price: 15000, duration: '3 Hari'),
+    Detail(name: 'Selimut Tebal', price: 15000, duration: '3 Hari'),
+    Detail(name: 'Selimut Tipis', price: 10000, duration: '3 Hari'),
   ];
 
   @override

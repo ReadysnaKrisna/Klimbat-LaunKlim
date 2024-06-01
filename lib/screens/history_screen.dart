@@ -1,42 +1,9 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(LaundryApp());
-}
-
-class LaundryApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Laundry App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HistoryScreen(),
-    );
-  }
-}
-
 class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.lightBlueAccent,
-        title: const Column(
-          children: [
-            Text(
-              'Laundry',
-              style: TextStyle(fontSize: 24),
-            ),
-            Text(
-              'LaunKlim',
-              style: TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
-        centerTitle: true,
-      ),
       body: const Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -69,9 +36,7 @@ class HistoryScreen extends StatelessWidget {
         ],
         currentIndex: 1,
         selectedItemColor: Colors.green,
-        onTap: (index) {
-          // Handle navigation
-        },
+        onTap: (index) {},
       ),
     );
   }
