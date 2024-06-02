@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import '../services/detail.dart';
 
-class Detail {
-  final String name;
-  final int price;
-  final String duration;
-
-  Detail({required this.name, required this.price, required this.duration});
+class DetailItemKasur extends StatefulWidget {
+  @override
+  _DetailItemKasurState createState() => _DetailItemKasurState();
 }
 
-class DetailItemKasur extends StatelessWidget {
+class _DetailItemKasurState extends State<DetailItemKasur> {
   final List<Detail> services = [
     Detail(name: 'Bedcover No.1', price: 25000, duration: '3 Hari'),
     Detail(name: 'Bedcover No.2', price: 20000, duration: '3 Hari'),
@@ -20,6 +18,18 @@ class DetailItemKasur extends StatelessWidget {
     Detail(name: 'Selimut Tebal', price: 15000, duration: '3 Hari'),
     Detail(name: 'Selimut Tipis', price: 10000, duration: '3 Hari'),
   ];
+
+  List<Detail> favorites = [];
+
+  void toggleFavorite(Detail detail) {
+    setState(() {
+      if (favorites.contains(detail)) {
+        favorites.remove(detail);
+      } else {
+        favorites.add(detail);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +46,7 @@ class DetailItemKasur extends StatelessWidget {
               alignment: Alignment.center,
               color: Colors.lightBlue,
               child: Text(
-                'Satuan',
+                'Item Kasur',
                 style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -48,21 +58,36 @@ class DetailItemKasur extends StatelessWidget {
                 padding: EdgeInsets.all(8.0),
                 itemCount: services.length,
                 itemBuilder: (context, index) {
+                  final detail = services[index];
+                  final isFavorite = favorites.contains(detail);
                   return Card(
                     color: Colors.lightBlue,
                     margin: EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      leading: Icon(Icons.local_laundry_service,
-                          color: Colors.white),
-                      title: Text(
-                        services[index].name,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      subtitle: Text(
-                        'Rp ${services[index].price}\n${services[index].duration}',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      isThreeLine: true,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            leading: Icon(Icons.local_laundry_service,
+                                color: Colors.white),
+                            title: Text(
+                              detail.name,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            subtitle: Text(
+                              'Rp ${detail.price}\n${detail.duration}',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            isThreeLine: true,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => toggleFavorite(detail),
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },

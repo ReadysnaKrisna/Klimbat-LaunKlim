@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:klimbat_launklim/services/edit_profile.dart';
+import 'package:klimbat_launklim/screens/sign_in_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late User? user;
+  late Future<Map<String, dynamic>> _userDataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    _userDataFuture = _getUserData();
+  }
+
+  Future<Map<String, dynamic>> _getUserData() async {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+    return userDoc.data() as Map<String, dynamic>;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,36 +54,80 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            ProfileItem(
-              icon: Icons.person,
-              text: 'Readysna Krisna Pambudi',
-            ),
-            ProfileItem(
-              icon: Icons.phone,
-              text: '082377832998',
-            ),
-            ProfileItem(
-              icon: Icons.email,
-              text: 'koalawaruk123@gmail.com',
-            ),
-            ProfileItem(
-              icon: Icons.favorite,
-              text: 'Favorite',
-              isPrivate: true,
-            ),
-            ProfileItem(
-              icon: Icons.feedback,
-              text: 'Umpan Balik',
-              isCommunity: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('Logout'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlueAccent,
-                padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-              ),
+            FutureBuilder<Map<String, dynamic>>(
+              future: _userDataFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  final userData = snapshot.data!;
+                  return Column(
+                    children: [
+                      ProfileItem(
+                        icon: Icons.person,
+                        text: userData['nama'] ?? 'Tidak ada Nama',
+                      ),
+                      ProfileItem(
+                        icon: Icons.phone,
+                        text: userData['phone'] ?? 'Tidak ada nomor hp',
+                      ),
+                      ProfileItem(
+                        icon: Icons.email,
+                        text: userData['email'] ?? 'Tidak ada email',
+                      ),
+                      ProfileItem(
+                        icon: Icons.favorite,
+                        text: 'Favorite',
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (context) => SignInScreen()));
+                        },
+                        child: Text('Logout'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 100, vertical: 15),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final Map<String, dynamic>? updatedData =
+                              await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileScreen(
+                                name: userData['nama'] ?? '',
+                                phone: userData['phone'] ?? '',
+                                email: userData['email'] ?? '',
+                              ),
+                            ),
+                          );
+
+                          if (updatedData != null) {
+                            setState(() {
+                              _userDataFuture = Future.value(updatedData);
+                            });
+                          }
+                        },
+                        child: Text('Edit Profile'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.lightBlueAccent,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 100, vertical: 15),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
           ],
         ),

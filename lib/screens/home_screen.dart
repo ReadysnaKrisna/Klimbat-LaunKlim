@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:klimbat_launklim/models/detail_pesan.dart';
 import 'package:klimbat_launklim/models/detail_kiloan.dart';
 import 'package:klimbat_launklim/models/detail_item_kasur.dart';
+import 'package:klimbat_launklim/models/detail_pesan.dart';
 import 'package:klimbat_launklim/models/detail_vip.dart';
 import 'package:klimbat_launklim/screens/history_screen.dart';
 import 'package:klimbat_launklim/screens/profile_screen.dart';
@@ -45,7 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         children: [
           HomeContent(getUserName: _getUserName),
-          HistoryScreen(),
+          HistoryScreen(
+            orders: [],
+          ),
           ProfileScreen(),
         ],
       ),
@@ -99,18 +101,13 @@ class HomeContent extends StatelessWidget {
             child: Column(
               children: [
                 ServiceSection(),
-                SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailPesan(),
-                      ),
-                    );
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => DetailPesan()));
                   },
                   child: Text('Pesan'),
-                ),
+                )
                 // PesananAktif(),
               ],
             ),

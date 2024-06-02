@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-
-class Detail {
-  final String name;
-  final int price;
-  final String duration;
-
-  Detail({required this.name, required this.price, required this.duration});
-}
+import '../services/detail.dart';
 
 class DetailKiloan extends StatelessWidget {
   final List<Detail> services = [

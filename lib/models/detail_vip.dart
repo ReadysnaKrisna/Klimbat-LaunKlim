@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-
-class Detail {
-  final String name;
-  final int price;
-  final String duration;
-
-  Detail({required this.name, required this.price, required this.duration});
-}
+import '../services/detail.dart';
 
 class DetailVIP extends StatelessWidget {
   final List<Detail> services = [
@@ -51,6 +44,7 @@ class DetailVIP extends StatelessWidget {
                 padding: EdgeInsets.all(8.0),
                 itemCount: services.length,
                 itemBuilder: (context, index) {
+                  final detail = services[index];
                   return Card(
                     color: Colors.lightBlueAccent,
                     margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -58,14 +52,22 @@ class DetailVIP extends StatelessWidget {
                       leading: Icon(Icons.local_laundry_service,
                           color: Colors.white),
                       title: Text(
-                        services[index].name,
+                        detail.name,
                         style: TextStyle(color: Colors.white),
                       ),
                       subtitle: Text(
-                        'Rp ${services[index].price}\n${services[index].duration}',
+                        'Rp ${detail.price}\n${detail.duration}',
                         style: TextStyle(color: Colors.white),
                       ),
                       isThreeLine: true,
+                      trailing: IconButton(
+                        icon: Icon(Icons.favorite_border),
+                        color: Colors.white,
+                        onPressed: () {
+                          // Tambahkan logika ketika tombol like ditekan
+                          // Misalnya, untuk menambahkan item ke daftar favorit
+                        },
+                      ),
                     ),
                   );
                 },

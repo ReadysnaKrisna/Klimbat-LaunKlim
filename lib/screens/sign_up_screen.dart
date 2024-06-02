@@ -20,9 +20,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign Up'),
-      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -81,7 +78,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         'email': _emailController.text,
                       });
 
-                      // After sign-up, navigate to the sign-in screen
                       Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (context) => SignInScreen()));
                     } catch (error) {
@@ -94,6 +90,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     }
                   },
                   child: const Text('Sign Up'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SignInScreen()),
+                    );
+                  },
+                  child: const Text('Have an account? Sign In'),
                 ),
               ],
             ),

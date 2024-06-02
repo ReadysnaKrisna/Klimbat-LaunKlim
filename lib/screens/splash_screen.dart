@@ -1,10 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:klimbat_launklim/screens/sign_in_screen.dart';
 import 'package:klimbat_launklim/screens/sign_up_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key});
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _HomePageState();
