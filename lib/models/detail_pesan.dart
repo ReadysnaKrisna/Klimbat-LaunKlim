@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:klimbat_launklim/services/location_service.dart';
 
 class Detail {
   final String name;
@@ -14,10 +18,10 @@ class DetailPesan extends StatefulWidget {
 }
 
 class _DetailPesanState extends State<DetailPesan> {
-  final TextEditingController _addressController = TextEditingController();
-
+  TextEditingController _addressController = TextEditingController();
   List<bool> _selectedServices = [false, false, false, false, false];
   int _totalPayment = 0;
+  final int _ongkir = 5000;
 
   final List<Detail> services = [
     Detail(name: 'Reguler', price: 7000, duration: '3 Hari'),
@@ -27,17 +31,51 @@ class _DetailPesanState extends State<DetailPesan> {
     Detail(name: 'Cuci Kering', price: 4000, duration: '3 Jam'),
   ];
 
+  late GoogleMapController _mapController;
+  Position? _currentPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFirebase();
+  }
+
+  Future<void> _initializeFirebase() async {
+    await Firebase.initializeApp();
+  }
+
   void _updateTotalPayment() {
-    int ongkir = 0;
+    int total = 0;
     for (int i = 0; i < _selectedServices.length; i++) {
       if (_selectedServices[i]) {
-        ongkir += services[i].price;
+        total += services[i].price;
       }
     }
 
     setState(() {
-      _totalPayment = ongkir;
+      _totalPayment = total + _ongkir;
     });
+  }
+
+  Future<void> _pickLocation() async {
+    Position? position = await LocationService.getCurrentPosition();
+    if (position != null) {
+      setState(() {
+        _currentPosition = position;
+        _addressController.text =
+            'Lat: ${position.latitude}, Long: ${position.longitude}';
+        _mapController.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(position.latitude, position.longitude),
+          ),
+        );
+      });
+    } else {
+      // Handle location permission denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location permission denied')),
+      );
+    }
   }
 
   @override
@@ -64,10 +102,39 @@ class _DetailPesanState extends State<DetailPesan> {
                   hintText: 'Pilih Alamat',
                   hintStyle: TextStyle(color: Colors.white),
                   border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.location_on, color: Colors.white),
+                    onPressed: _pickLocation,
+                  ),
                 ),
                 style: TextStyle(color: Colors.white),
               ),
             ),
+            SizedBox(height: 16),
+            _currentPosition == null
+                ? Container(
+                    color: Colors.grey[200] ?? Color(0xFFEEEEEE),
+                    height: 200,
+                    child: Center(child: Text('Loading map...')),
+                  )
+                : Container(
+                    color: Colors.grey[200] ?? Color(0xFFEEEEEE),
+                    height: 200,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          _currentPosition!.latitude,
+                          _currentPosition!.longitude,
+                        ),
+                        zoom: 15,
+                      ),
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                      },
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                    ),
+                  ),
             SizedBox(height: 16),
             Container(
               color: Colors.grey[200] ?? Color(0xFFEEEEEE),
@@ -111,7 +178,7 @@ class _DetailPesanState extends State<DetailPesan> {
             SizedBox(height: 8),
             Bayar(
               nama: 'Biaya Pengiriman:',
-              harga: 5000,
+              harga: _ongkir,
               color: Colors.grey[200] ?? Color(0xFFEEEEEE),
             ),
             Spacer(),
@@ -128,8 +195,7 @@ class _DetailPesanState extends State<DetailPesan> {
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                  backgroundColor:
-                      Colors.lightBlueAccent, // Match the button color
+                  backgroundColor: Colors.lightBlueAccent,
                   textStyle: TextStyle(fontSize: 18, color: Colors.black),
                 ),
                 child: Text('PESAN', style: TextStyle(color: Colors.black)),
