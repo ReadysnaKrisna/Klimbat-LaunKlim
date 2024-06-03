@@ -45,9 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         children: [
           HomeContent(getUserName: _getUserName),
-          HistoryScreen(
-            orders: [],
-          ),
+          HistoryScreen(),
           ProfileScreen(),
         ],
       ),
@@ -97,16 +95,27 @@ class HomeContent extends StatelessWidget {
             },
           ),
           SizedBox(height: 30),
-          Expanded(
+          Flexible(
             child: Column(
               children: [
                 ServiceSection(),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => DetailPesan()));
-                  },
-                  child: Text('Pesan'),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DetailPesan()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.lightBlueAccent,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                    ),
+                    child: Text('Pesan'),
+                  ),
                 ),
               ],
             ),
@@ -124,10 +133,15 @@ class WelcomeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('Selamat Datang, $userName', style: TextStyle(fontSize: 20)),
-      ],
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      color: Colors.lightBlueAccent,
+      child: Center(
+        child: Text(
+          'Selamat Datang, $userName',
+          style: TextStyle(fontSize: 20, color: Colors.white),
+        ),
+      ),
     );
   }
 }
@@ -141,7 +155,7 @@ class ServiceSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Flexible(
       child: GridView.builder(
         padding: EdgeInsets.all(4),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -203,34 +217,11 @@ class Layanan extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 50, color: Colors.black),
-          Text(label, style: TextStyle(color: Colors.black)),
+          Icon(icon, size: 50, color: Colors.white),
+          SizedBox(height: 8),
+          Text(label, style: TextStyle(color: Colors.white)),
         ],
       ),
-    );
-  }
-}
-
-class PesananAktif extends StatelessWidget {
-  final Map<String, dynamic> orderData;
-
-  const PesananAktif({required this.orderData});
-
-  @override
-  Widget build(BuildContext context) {
-    // Ubah format data pesanan sesuai kebutuhan tampilan Anda
-    String location = orderData['location'];
-    List<bool> selectedServices = orderData['selectedServices'];
-    int totalPayment = orderData['totalPayment'];
-
-    // Gunakan data pesanan dalam UI Anda
-    return Column(
-      children: [
-        Text('Pesanan Aktif:', style: TextStyle(fontSize: 20)),
-        Text('Lokasi: $location'),
-        Text('Layanan yang Dipilih: $selectedServices'),
-        Text('Total Pembayaran: $totalPayment'),
-      ],
     );
   }
 }

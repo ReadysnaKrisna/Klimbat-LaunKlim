@@ -99,15 +99,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Wrap(
               children: <Widget>[
                 ListTile(
-                    leading: Icon(Icons.photo_library),
-                    title: Text('Gallery'),
+                    leading: Icon(Icons.photo_library, color: Colors.white),
+                    title:
+                        Text('Gallery', style: TextStyle(color: Colors.white)),
                     onTap: () {
                       _pickImage(ImageSource.gallery);
                       Navigator.of(context).pop();
                     }),
                 ListTile(
-                  leading: Icon(Icons.photo_camera),
-                  title: Text('Camera'),
+                  leading: Icon(Icons.photo_camera, color: Colors.white),
+                  title: Text('Camera', style: TextStyle(color: Colors.white)),
                   onTap: () {
                     _pickImage(ImageSource.camera);
                     Navigator.of(context).pop();
@@ -147,6 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Icon(
                               Icons.person,
                               size: 80,
+                              color: Colors.white,
                             ),
                           );
                         } else if (snapshot.hasError) {
@@ -156,6 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Icon(
                               Icons.error,
                               size: 80,
+                              color: Colors.white,
                             ),
                           );
                         } else {
@@ -169,6 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? Icon(
                                     Icons.person,
                                     size: 80,
+                                    color: Colors.white,
                                   )
                                 : null,
                           );
@@ -186,7 +190,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
+                  return Text('Error: ${snapshot.error}',
+                      style: TextStyle(color: Colors.white));
                 } else {
                   final userData = snapshot.data!;
                   return Column(
@@ -225,9 +230,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               MaterialPageRoute(
                                   builder: (context) => SignInScreen()));
                         },
-                        child: Text('Logout'),
+                        child: Text('Logout',
+                            style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.lightBlueAccent,
                           padding: EdgeInsets.symmetric(
                               horizontal: 100, vertical: 15),
                         ),
@@ -253,7 +260,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             });
                           }
                         },
-                        child: Text('Edit Profile'),
+                        child: Text('Edit Profile',
+                            style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.lightBlueAccent,
                           padding: EdgeInsets.symmetric(
@@ -297,18 +305,19 @@ class ProfileItem extends StatelessWidget {
         color: Colors.lightBlueAccent,
         child: Row(
           children: <Widget>[
-            Icon(icon, size: 30),
+            Icon(icon, size: 30, color: Colors.white),
             SizedBox(width: 10),
             Expanded(
               child: Text(
                 text,
                 style: TextStyle(
                   fontSize: 18,
+                  color: Colors.white,
                 ),
               ),
             ),
-            if (isPrivate) Icon(Icons.lock, size: 20, color: Colors.black),
-            if (isCommunity) Icon(Icons.group, size: 20, color: Colors.black),
+            if (isPrivate) Icon(Icons.lock, size: 20, color: Colors.white),
+            if (isCommunity) Icon(Icons.group, size: 20, color: Colors.white),
           ],
         ),
       ),

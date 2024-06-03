@@ -76,6 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Text('Save'),
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                foregroundColor: Colors.white,
                 backgroundColor: Colors.lightBlueAccent,
               ),
             ),

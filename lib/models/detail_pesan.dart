@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:klimbat_launklim/services/detail.dart';
@@ -51,13 +52,25 @@ class _DetailPesanState extends State<DetailPesan> {
     }
   }
 
-  void _submitOrder() {
-    List<Detail> selectedServices = [];
+  void _submitOrder() async {
+    List<Map<String, dynamic>> selectedServices = [];
     for (int i = 0; i < _selectedServices.length; i++) {
       if (_selectedServices[i]) {
-        selectedServices.add(services[i]);
+        selectedServices.add({
+          'name': services[i].name,
+          'price': services[i].price,
+          'duration': services[i].duration,
+        });
       }
     }
+
+    await FirebaseFirestore.instance.collection('orders').add({
+      'location': _addressController.text,
+      'services': selectedServices,
+      'totalPayment': _totalPayment,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
     Navigator.pop(context);
   }
 
@@ -67,10 +80,10 @@ class _DetailPesanState extends State<DetailPesan> {
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Pemesanan', style: TextStyle(color: Colors.black)),
+        title: Text('Pemesanan', style: TextStyle(color: Colors.white)),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -109,7 +122,7 @@ class _DetailPesanState extends State<DetailPesan> {
               ),
               SizedBox(height: 16),
               Container(
-                color: Colors.grey[200] ?? Color(0xFFEEEEEE),
+                color: Colors.lightBlueAccent,
                 padding: EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,44 +132,53 @@ class _DetailPesanState extends State<DetailPesan> {
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black),
+                          color: Colors.white),
                     ),
                     SizedBox(height: 8),
                     Column(
                       children: List.generate(services.length, (index) {
-                        return CheckboxListTile(
-                          title: Text(
-                            services[index].name,
-                            style: TextStyle(fontSize: 16),
+                        return Container(
+                          color: Colors.lightBlueAccent,
+                          child: CheckboxListTile(
+                            title: Text(
+                              services[index].name,
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white),
+                            ),
+                            subtitle: Text(
+                              'Rp ${services[index].price} - ${services[index].duration}',
+                              style:
+                                  TextStyle(fontSize: 14, color: Colors.white),
+                            ),
+                            value: _selectedServices[index],
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _selectedServices[index] = value ?? false;
+                                _updateTotalPayment();
+                              });
+                            },
+                            activeColor: Colors.white,
+                            checkColor: Colors.lightBlueAccent,
                           ),
-                          subtitle: Text(
-                            'Rp ${services[index].price} - ${services[index].duration}',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          value: _selectedServices[index],
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _selectedServices[index] = value ?? false;
-                              _updateTotalPayment();
-                            });
-                          },
                         );
                       }),
                     ),
                   ],
                 ),
               ),
-              Divider(thickness: 1, color: Colors.black),
+              Divider(thickness: 1, color: Colors.white),
               SizedBox(height: 8),
               Bayar(
                 nama: 'Biaya Pengiriman:',
                 harga: 5000,
-                color: Colors.grey[200] ?? Color(0xFFEEEEEE),
+                color: Colors.lightBlueAccent,
+                textColor: Colors.white,
               ),
               Bayar(
                 nama: 'Total Pembayaran:',
                 harga: _totalPayment,
-                color: Colors.grey[200] ?? Color(0xFFEEEEEE),
+                color: Colors.lightBlueAccent,
+                textColor: Colors.white,
               ),
               SizedBox(height: 10),
               Center(
@@ -165,10 +187,10 @@ class _DetailPesanState extends State<DetailPesan> {
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 22, vertical: 16),
                     backgroundColor: Colors.lightBlueAccent,
-                    textStyle: TextStyle(fontSize: 18, color: Colors.black),
+                    textStyle: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                   child: Text('PESAN SEKARANG',
-                      style: TextStyle(color: Colors.black)),
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -183,11 +205,13 @@ class Bayar extends StatelessWidget {
   final String nama;
   final int harga;
   final Color color;
+  final Color textColor;
 
   const Bayar({
     required this.nama,
     required this.harga,
     required this.color,
+    required this.textColor,
   });
 
   @override
@@ -199,8 +223,8 @@ class Bayar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(nama, style: TextStyle(fontSize: 16)),
-          Text('Rp $harga', style: TextStyle(fontSize: 16)),
+          Text(nama, style: TextStyle(fontSize: 16, color: textColor)),
+          Text('Rp $harga', style: TextStyle(fontSize: 16, color: textColor)),
         ],
       ),
     );
