@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/detail.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DetailItemKasur extends StatefulWidget {
   @override
@@ -20,15 +22,59 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
   ];
 
   List<Detail> favorites = [];
+  User? user;
 
-  void toggleFavorite(Detail detail) {
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final userFavorites = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('favorites')
+        .get();
+
     setState(() {
-      if (favorites.contains(detail)) {
-        favorites.remove(detail);
-      } else {
-        favorites.add(detail);
-      }
+      favorites = userFavorites.docs
+          .map((doc) => Detail(
+                name: doc['name'],
+                price: doc['price'],
+                duration: doc['duration'],
+              ))
+          .toList();
     });
+  }
+
+  Future<void> _toggleFavorite(Detail detail) async {
+    final userDoc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('favorites')
+        .doc(detail.name);
+
+    if (favorites.contains(detail)) {
+      await userDoc.delete();
+      setState(() {
+        favorites.remove(detail);
+      });
+    } else {
+      await userDoc.set({
+        'name': detail.name,
+        'price': detail.price,
+        'duration': detail.duration,
+      });
+      setState(() {
+        favorites.add(detail);
+      });
+    }
+  }
+
+  bool _isFavorite(Detail detail) {
+    return favorites.any((favorite) => favorite.name == detail.name);
   }
 
   @override
@@ -48,9 +94,10 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
               child: Text(
                 'Item Kasur',
                 style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             Expanded(
@@ -59,7 +106,7 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
                 itemCount: services.length,
                 itemBuilder: (context, index) {
                   final detail = services[index];
-                  final isFavorite = favorites.contains(detail);
+                  final isFavorite = _isFavorite(detail);
                   return Card(
                     color: Colors.lightBlue,
                     margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -67,8 +114,10 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
                       children: [
                         Expanded(
                           child: ListTile(
-                            leading: Icon(Icons.local_laundry_service,
-                                color: Colors.white),
+                            leading: Icon(
+                              Icons.local_laundry_service,
+                              color: Colors.white,
+                            ),
                             title: Text(
                               detail.name,
                               style: TextStyle(color: Colors.white),
@@ -81,7 +130,7 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () => toggleFavorite(detail),
+                          onPressed: () => _toggleFavorite(detail),
                           icon: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
                             color: Colors.white,

@@ -107,8 +107,7 @@ class HomeContent extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => DetailPesan()));
                   },
                   child: Text('Pesan'),
-                )
-                // PesananAktif(),
+                ),
               ],
             ),
           ),
@@ -208,6 +207,30 @@ class Layanan extends StatelessWidget {
           Text(label, style: TextStyle(color: Colors.black)),
         ],
       ),
+    );
+  }
+}
+
+class PesananAktif extends StatelessWidget {
+  final Map<String, dynamic> orderData;
+
+  const PesananAktif({required this.orderData});
+
+  @override
+  Widget build(BuildContext context) {
+    // Ubah format data pesanan sesuai kebutuhan tampilan Anda
+    String location = orderData['location'];
+    List<bool> selectedServices = orderData['selectedServices'];
+    int totalPayment = orderData['totalPayment'];
+
+    // Gunakan data pesanan dalam UI Anda
+    return Column(
+      children: [
+        Text('Pesanan Aktif:', style: TextStyle(fontSize: 20)),
+        Text('Lokasi: $location'),
+        Text('Layanan yang Dipilih: $selectedServices'),
+        Text('Total Pembayaran: $totalPayment'),
+      ],
     );
   }
 }

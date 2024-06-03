@@ -58,14 +58,6 @@ class _DetailPesanState extends State<DetailPesan> {
         selectedServices.add(services[i]);
       }
     }
-
-    // Order newOrder = Order(
-    //   selectedServices: selectedServices,
-    //   totalPayment: _totalPayment,
-    //   address: _addressController.text,
-    // );
-
-    // widget.onOrderComplete(newOrder);
     Navigator.pop(context);
   }
 
@@ -175,7 +167,8 @@ class _DetailPesanState extends State<DetailPesan> {
                     backgroundColor: Colors.lightBlueAccent,
                     textStyle: TextStyle(fontSize: 18, color: Colors.black),
                   ),
-                  child: Text('PESAN', style: TextStyle(color: Colors.black)),
+                  child: Text('PESAN SEKARANG',
+                      style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],
