@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/detail.dart';
+import 'package:klimbat_launklim/services/data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:klimbat_launklim/services/detail.dart';
 
 class DetailItemKasur extends StatefulWidget {
   @override
@@ -9,18 +10,6 @@ class DetailItemKasur extends StatefulWidget {
 }
 
 class _DetailItemKasurState extends State<DetailItemKasur> {
-  final List<Detail> services = [
-    Detail(name: 'Bedcover No.1', price: 25000, duration: '3 Hari'),
-    Detail(name: 'Bedcover No.2', price: 20000, duration: '3 Hari'),
-    Detail(name: 'Bedcover No.3', price: 15000, duration: '3 Hari'),
-    Detail(name: 'Seprei No.1', price: 15000, duration: '3 Hari'),
-    Detail(name: 'Seprei No.2', price: 10000, duration: '3 Hari'),
-    Detail(name: 'Seprei No.3', price: 8000, duration: '3 Hari'),
-    Detail(name: 'Seprei Sedang/Double', price: 15000, duration: '3 Hari'),
-    Detail(name: 'Selimut Tebal', price: 15000, duration: '3 Hari'),
-    Detail(name: 'Selimut Tipis', price: 10000, duration: '3 Hari'),
-  ];
-
   List<Detail> favorites = [];
   User? user;
 
@@ -90,7 +79,7 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
             Container(
               padding: EdgeInsets.all(16.0),
               alignment: Alignment.center,
-              color: Colors.lightBlue,
+              color: Colors.lightBlueAccent,
               child: Text(
                 'Item Kasur',
                 style: TextStyle(
@@ -103,12 +92,12 @@ class _DetailItemKasurState extends State<DetailItemKasur> {
             Expanded(
               child: ListView.builder(
                 padding: EdgeInsets.all(8.0),
-                itemCount: services.length,
+                itemCount: kasurServices.length,
                 itemBuilder: (context, index) {
-                  final detail = services[index];
+                  final detail = kasurServices[index];
                   final isFavorite = _isFavorite(detail);
                   return Card(
-                    color: Colors.lightBlue,
+                    color: Colors.lightBlueAccent,
                     margin: EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
                       children: [
