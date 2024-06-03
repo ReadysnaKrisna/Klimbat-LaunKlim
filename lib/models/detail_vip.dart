@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/detail.dart';
+import 'package:klimbat_launklim/services/data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:klimbat_launklim/services/detail.dart';
 
 class DetailVIP extends StatefulWidget {
   @override
@@ -9,21 +10,6 @@ class DetailVIP extends StatefulWidget {
 }
 
 class _DetailVIPState extends State<DetailVIP> {
-  final List<Detail> services = [
-    Detail(name: 'Gorden', price: 12000, duration: '3 Hari'),
-    Detail(name: 'Vitrose', price: 7000, duration: '3 Hari'),
-    Detail(name: 'Boneka Kecil', price: 7000, duration: '3 Hari'),
-    Detail(name: 'Boneka Sedang', price: 15000, duration: '3 Hari'),
-    Detail(name: 'Boneka Besar', price: 25000, duration: '3 Hari'),
-    Detail(name: 'Stroller', price: 100000, duration: '3 Hari'),
-    Detail(name: 'Kemeja/Batik', price: 12000, duration: '3 Hari'),
-    Detail(name: 'Jas', price: 17000, duration: '3 Hari'),
-    Detail(name: 'Setelan Jas', price: 30000, duration: '3 Hari'),
-    Detail(name: 'Jaket', price: 20000, duration: '3 Hari'),
-    Detail(name: 'Gamis', price: 17000, duration: '3 Hari'),
-    Detail(name: 'Setelan Wanita', price: 17000, duration: '3 Hari'),
-  ];
-
   List<Detail> favorites = [];
   User? user;
 
@@ -93,7 +79,7 @@ class _DetailVIPState extends State<DetailVIP> {
             Container(
               padding: EdgeInsets.all(16.0),
               alignment: Alignment.center,
-              color: Colors.lightBlue,
+              color: Colors.lightBlueAccent,
               child: Text(
                 'VIP',
                 style: TextStyle(
@@ -106,12 +92,12 @@ class _DetailVIPState extends State<DetailVIP> {
             Expanded(
               child: ListView.builder(
                 padding: EdgeInsets.all(8.0),
-                itemCount: services.length,
+                itemCount: vipServices.length,
                 itemBuilder: (context, index) {
-                  final detail = services[index];
+                  final detail = vipServices[index];
                   final isFavorite = _isFavorite(detail);
                   return Card(
-                    color: Colors.lightBlue,
+                    color: Colors.lightBlueAccent,
                     margin: EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
                       children: [
