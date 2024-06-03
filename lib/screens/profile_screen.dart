@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:klimbat_launklim/screens/review_screen.dart';
+import 'package:klimbat_launklim/screens/umpan_balik_screen.dart';
 import 'package:klimbat_launklim/services/edit_profile.dart';
 import 'package:klimbat_launklim/screens/sign_in_screen.dart';
 import 'package:klimbat_launklim/screens/favorite_screen.dart';
@@ -92,8 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .update({'profileImageUrl': url});
 
       setState(() {
-        _userDataFuture =
-            _getUserData(); // Update the FutureBuilder with the new image URL
+        _userDataFuture = _getUserData();
       });
     } catch (e) {
       print('Error uploading image: $e');
@@ -110,14 +111,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 leading: Icon(Icons.photo_library, color: Colors.black),
                 title: Text('Gallery', style: TextStyle(color: Colors.black)),
-                onTap: () {
-                  _pickImage();
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo_camera, color: Colors.black),
-                title: Text('Camera', style: TextStyle(color: Colors.black)),
                 onTap: () {
                   _pickImage();
                   Navigator.of(context).pop();
@@ -290,6 +283,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 favorites: favorites,
                               ),
                             ),
+                          );
+                        },
+                      ),
+                      ProfileItem(
+                        icon: Icons.feedback,
+                        text: 'Umpan Balik',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FeedbackScreen()),
+                          );
+                        },
+                      ),
+                      ProfileItem(
+                        icon: Icons.reviews,
+                        text: 'Review',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ReviewScreen()),
                           );
                         },
                       ),
