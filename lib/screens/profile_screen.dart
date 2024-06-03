@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:klimbat_launklim/services/edit_profile.dart';
@@ -15,7 +16,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late User? user;
+  User? user;
   late Future<Map<String, dynamic>> _userDataFuture;
   File? _image;
   final ImagePicker _picker = ImagePicker();
@@ -25,11 +26,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    _userDataFuture = _getUserData();
-    _loadFavorites();
+    if (user != null) {
+      _userDataFuture = _getUserData();
+      _loadFavorites();
+    }
   }
 
   Future<Map<String, dynamic>> _getUserData() async {
+    if (user == null) {
+      throw Exception("User not logged in");
+    }
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
@@ -38,6 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadFavorites() async {
+    if (user == null) return;
     final userFavorites = await FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
@@ -55,14 +62,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final XFile? selectedImage = await _picker.pickImage(source: source);
+  Future _pickImage() async {
+    try {
+      final image = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (image == null) return;
 
-    if (selectedImage != null) {
-      setState(() {
-        _image = File(selectedImage.path);
-      });
-      await _uploadImage();
+      final imageTemporary = File(image.path);
+      setState(() => this._image = imageTemporary);
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
     }
   }
 
@@ -84,7 +92,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .update({'profileImageUrl': url});
 
       setState(() {
-        _userDataFuture = _getUserData();
+        _userDataFuture =
+            _getUserData(); // Update the FutureBuilder with the new image URL
       });
     } catch (e) {
       print('Error uploading image: $e');
@@ -93,31 +102,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showPicker(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-            child: Wrap(
-              children: <Widget>[
-                ListTile(
-                    leading: Icon(Icons.photo_library, color: Colors.white),
-                    title:
-                        Text('Gallery', style: TextStyle(color: Colors.white)),
-                    onTap: () {
-                      _pickImage(ImageSource.gallery);
-                      Navigator.of(context).pop();
-                    }),
-                ListTile(
-                  leading: Icon(Icons.photo_camera, color: Colors.white),
-                  title: Text('Camera', style: TextStyle(color: Colors.white)),
-                  onTap: () {
-                    _pickImage(ImageSource.camera);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-          );
-        });
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.photo_library, color: Colors.black),
+                title: Text('Gallery', style: TextStyle(color: Colors.black)),
+                onTap: () {
+                  _pickImage();
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_camera, color: Colors.black),
+                title: Text('Camera', style: TextStyle(color: Colors.black)),
+                onTap: () {
+                  _pickImage();
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -133,54 +143,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(20),
               child: Column(
                 children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      _showPicker(context);
-                    },
-                    child: FutureBuilder<Map<String, dynamic>>(
-                      future: _userDataFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return CircleAvatar(
-                            radius: 60,
-                            backgroundColor: Colors.grey[200],
-                            child: Icon(
-                              Icons.person,
-                              size: 80,
-                              color: Colors.white,
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return CircleAvatar(
-                            radius: 60,
-                            backgroundColor: Colors.grey[200],
-                            child: Icon(
-                              Icons.error,
-                              size: 80,
-                              color: Colors.white,
-                            ),
-                          );
-                        } else {
-                          final userData = snapshot.data!;
-                          return CircleAvatar(
-                            radius: 60,
-                            backgroundImage: userData['profileImageUrl'] != null
-                                ? NetworkImage(userData['profileImageUrl'])
-                                : null,
-                            child: userData['profileImageUrl'] == null
-                                ? Icon(
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        _showPicker(context);
+                      },
+                      child: FutureBuilder<Map<String, dynamic>>(
+                        future: _userDataFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 60,
+                                  backgroundColor: Colors.grey[200],
+                                  child: Icon(
                                     Icons.person,
                                     size: 80,
                                     color: Colors.white,
-                                  )
-                                : null,
-                          );
-                        }
-                      },
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else if (snapshot.hasError) {
+                            return Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 60,
+                                  backgroundColor: Colors.grey[200],
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 80,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            final userData = snapshot.data!;
+                            return Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 60,
+                                  backgroundImage:
+                                      userData['profileImageUrl'] != null
+                                          ? NetworkImage(
+                                              userData['profileImageUrl'])
+                                          : null,
+                                  child: userData['profileImageUrl'] == null
+                                      ? Icon(
+                                          Icons.person,
+                                          size: 80,
+                                          color: Colors.white,
+                                        )
+                                      : null,
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ),
-                  SizedBox(height: 10),
                 ],
               ),
             ),
@@ -191,7 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}',
-                      style: TextStyle(color: Colors.white));
+                      style: TextStyle(color: Colors.black));
                 } else {
                   final userData = snapshot.data!;
                   return Column(
