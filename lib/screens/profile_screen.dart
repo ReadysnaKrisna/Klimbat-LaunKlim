@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future _pickImage() async {
     try {
-      final image = await ImagePicker().pickImage(source: ImageSource.camera);
+      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
       final imageTemporary = File(image.path);
