@@ -64,13 +64,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future _pickImage() async {
+  Future<void> _pickImage() async {
     try {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
       final imageTemporary = File(image.path);
       setState(() => this._image = imageTemporary);
+
+      // Upload image to Firebase Storage
+      await _uploadImage();
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
